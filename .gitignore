@@ -1,0 +1,6 @@
+.env
+__pycache__/
+.venv/
+uploads/*.pdf
+*.log
+.vscode/

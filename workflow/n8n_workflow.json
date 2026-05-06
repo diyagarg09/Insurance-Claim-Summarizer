@@ -1,0 +1,203 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "accident_pdf",
+        "options": {
+          "joinPages": true,
+          "maxPages": 0
+        }
+      },
+      "id": "e87e5960-a844-455d-8059-b5ede667fc98",
+      "name": "Extract PDF Content",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert insurance claims analyst with fraud detection expertise. Analyze the following accident report and provide a comprehensive 2-page summary (approximately 1000 words) in English.\n\n**IMPORTANT:** If the document is in Hindi, Urdu, or any regional language, translate it to English while maintaining accuracy.\n\n**LIABILITY ANALYSIS:**\n- Determination of fault and contributing factors\n- Evidence supporting liability assessment\n- Applicable laws and regulations\n- Comparative negligence considerations\n- Liability percentage recommendations\n\n**DAMAGES ASSESSMENT:**\n- Property damage details and estimated costs\n- Bodily injuries and medical treatment\n- Lost wages and economic losses\n- Pain and suffering considerations\n- Total damages valuation\n\n**FRAUD DETECTION - RED FLAGS:**\nCarefully examine and flag any suspicious indicators:\n- Inconsistent dates or timelines (e.g., treatment before accident, conflicting incident dates)\n- Contradictory statements or details between parties\n- Unusual patterns (e.g., multiple claims, pre-existing damage claims)\n- Missing or vague critical information\n- Exaggerated injury claims vs. accident severity\n- Delayed reporting without valid explanation\n- Witness credibility issues\n- Document authenticity concerns\n\nAlso include brief context on parties involved, date/time/location, and incident description.\n\n**Format your response with clear sections and list any RED FLAGS prominently.**\n\nAccident Report:\n{{ $json.text }}",
+        "options": {
+          "systemMessage": "You are a professional insurance claims analyst specializing in liability determination, damages assessment, and fraud detection. Always provide summaries in English, translating from other languages when necessary.",
+          "maxIterations": 5
+        }
+      },
+      "id": "7dd27f9e-8b21-49af-8f0f-c3bebc3ad4f8",
+      "name": "Summarize Accident Report",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        688,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "claim_number",
+              "value": "={{ $(\"When Accident Report Received\").item.json.claim_number }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "summary",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "3",
+              "name": "summary_length",
+              "value": "={{ $json.output.length }}",
+              "type": "number"
+            },
+            {
+              "id": "4",
+              "name": "processed_date",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "47f3a34b-6943-4d43-95e5-a1bbc6cc4bcb",
+      "name": "Format Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "Insurance Accident Report Upload",
+        "formDescription": "Please upload the accident report PDF (up to 500 pages) for processing and summarization.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Accident Report PDF",
+              "fieldType": "file",
+              "fieldName": "accident_pdf",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Claim Number (Optional)",
+              "fieldName": "claim_number",
+              "placeholder": "Enter claim number if available"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "buttonLabel": "Submit Report",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Your accident report has been received and is being processed. You will receive the summary shortly."
+            }
+          }
+        }
+      },
+      "id": "5b02c066-4f7d-4092-8845-468a5946d749",
+      "name": "When Accident Report Received",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "15a134d5-02e9-4f72-8fa3-de2850ee566f"
+    },
+    {
+      "parameters": {},
+      "id": "eaa79dd2-5b76-407d-b70b-fe06bf75dd61",
+      "name": "When Accident Report Received 1",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        528
+      ],
+      "id": "57efd252-4c8e-4fd0-b423-7bc5816ef64d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gvAD2A6ub7nwAdhr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Extract PDF Content": {
+      "main": [
+        [
+          {
+            "node": "Summarize Accident Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Accident Report": {
+      "main": [
+        [
+          {
+            "node": "Format Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Accident Report Received": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize Accident Report",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a09d683b368208e02ef957e56f0fc4e2319848ac7b2e812a0f00222b3e99f670"
+  }
+}
