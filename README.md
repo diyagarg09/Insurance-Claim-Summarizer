@@ -79,3 +79,16 @@ Accident-Report-AI/
    │ MongoDB Database │        │ Frontend Display   │
    │ Store Summary    │        │ Show Result        │
    └──────────────────┘        └────────────────────┘
+
+
+
+Contribution:
+
+All kinds of contributions are welcome.
+Submit a Pull Request
+fix a bug
+add a new feature
+Open an Issue
+any suggestions
+any questions
+If you find pkpy useful, consider star this repository :).
