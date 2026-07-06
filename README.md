@@ -36,7 +36,7 @@ Accident-Report-AI/
 
 
 
-                     🔵 ⭕ USER
+         🔵 ⭕ USER
               |
               v
     🟦 ┌──────────────────────┐
